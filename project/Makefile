@@ -1,5 +1,3 @@
-CFLAGS += -fprofile-arcs -ftest-coverage
-LIBS += -lgcov
 CC = gcc
 CFLAGS = -Wall -Wextra -Iincludes
 LDFLAGS = -lsqlite3
