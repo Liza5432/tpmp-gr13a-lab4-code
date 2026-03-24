@@ -26,3 +26,21 @@ jobs:
         with:
           name: green_app
           path: project/bin/green_app
+
+      - name: Build with Coverage
+        run: |
+          gcc -Iproject/includes project/src/database.c project/src/tests.c -o test_runner -lsqlite3 -fprofile-arcs -ftest-coverage
+      
+      - name: Run Tests
+        run: ./test_runner
+
+      - name: Generate Coverage Report
+        run: |
+          gcov project/src/database.c
+          
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./database.c.gcov
+          fail_ci_if_error: true
