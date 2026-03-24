@@ -13,13 +13,13 @@ TARGET = $(BIN_DIR)/green_app
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-<TAB>$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-<TAB>mkdir -p $(OBJ_DIR)
-<TAB>$(CC) $(CFLAGS) -c $< -o $@
+	mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-<TAB>rm -rf $(OBJ_DIR) $(TARGET)
+	rm -rf $(OBJ_DIR) $(TARGET)
 
 .PHONY: all clean
