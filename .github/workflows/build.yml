@@ -1,4 +1,4 @@
-name: C Project Build
+name: Build, Test and Coverage
 
 on:
   push:
@@ -7,22 +7,46 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y build-essential
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential lcov gcovr sqlite3 libsqlite3-dev
 
-      - name: Build project
+      - name: Build project with coverage flags
         working-directory: ./project
-        run: make
+        run: |
+          make clean
+          make CFLAGS="-Wall -Wextra -Iincludes -fprofile-arcs -ftest-coverage" \
+               LDFLAGS="-lsqlite3 -lgcov"
 
-      - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
+      - name: Build tests
+        working-directory: ./project
+        run: |
+          gcc -Iincludes src/database.c tests.c \
+              -o test_runner \
+              -lsqlite3 -fprofile-arcs -ftest-coverage -lgcov
+
+      - name: Run tests
+        working-directory: ./project
+        run: ./test_runner
+
+      - name: Generate coverage report
+        working-directory: ./project
+        run: |
+          lcov --capture --directory . --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" --output-file coverage.info --ignore-errors unused
+          lcov --list coverage.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
-          name: green_app
-          path: project/bin/green_app
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: project/coverage.info
+          fail_ci_if_error: true
