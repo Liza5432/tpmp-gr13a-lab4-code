@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Iincludes
+LDFLAGS = -lsqlite3
 
 SRC_DIR = src
 OBJ_DIR = obj
@@ -13,7 +14,7 @@ TARGET = $(BIN_DIR)/green_app
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
