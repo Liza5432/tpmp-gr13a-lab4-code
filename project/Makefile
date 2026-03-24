@@ -1,21 +1,25 @@
 CC = gcc
-LIBS = -lsqlite3
-CFLAGS = -Wall -Wextra -std=c11 -MMD -MP -Iproject/includes
+CFLAGS = -Wall -Wextra -Iincludes
 
-TARGET = project/bin/green_app
-SRC = project/src/main.c project/src/database.c
-OBJ = $(SRC:.c=.o)
-DEPS = $(OBJ:.o=.d)
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
+
+SOURCES = $(wildcard $(SRC_DIR)/*.c)
+OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
+
+TARGET = $(BIN_DIR)/green_app
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $@ $(LIBS)
+$(TARGET): $(OBJECTS)
+    $(CC) $(CFLAGS) -o $@ $^
 
-project/src/%.o: project/src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+    mkdir -p $(OBJ_DIR)
+    $(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJ) $(DEPS)
+    rm -rf $(OBJ_DIR) $(TARGET)
 
--include $(DEPS)
+.PHONY: all clean
