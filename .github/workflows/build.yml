@@ -37,6 +37,10 @@ jobs:
         working-directory: ./project
         run: ./test_runner
 
+      - name: Run main application
+        working-directory: ./project
+        run: ./bin/app || true
+
       - name: Generate coverage report
         working-directory: ./project
         run: |
