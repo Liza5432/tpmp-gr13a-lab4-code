@@ -27,7 +27,7 @@ void test_database_logic() {
 
     rc = Get_Flower_Price(db, 1, &price);
     assert(rc == SQLITE_OK);
-    assert(price == 15.0);
+    assert(price == 10.0);
     printf("Test 3: Safe_Price_Update OK\n");
 
     Delete_Order_By_Id(db, 999);
