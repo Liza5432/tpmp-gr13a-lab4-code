@@ -1,56 +1,52 @@
 name: Build, Test and Coverage
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential lcov gcovr sqlite3 libsqlite3-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential lcov gcovr sqlite3 libsqlite3-dev
 
-      - name: Build project with coverage flags
-        working-directory: ./project
-        run: |
-          make clean
-          make CFLAGS="-Wall -Wextra -Iincludes -fprofile-arcs -ftest-coverage" \
-               LDFLAGS="-lsqlite3 -lgcov"
+      - name: Build project with coverage flags
+        working-directory: ./project
+        run: |
+          make clean
+          make CFLAGS="-Wall -Wextra -Iincludes -fprofile-arcs -ftest-coverage" \
+               LDFLAGS="-lsqlite3 -lgcov"
 
-      - name: Build tests
-        working-directory: ./project
-        run: |
-          gcc -Iincludes src/database.c tests.c \
-              -o test_runner \
-              -lsqlite3 -fprofile-arcs -ftest-coverage -lgcov
+      - name: Build tests
+        working-directory: ./project
+        run: |
+          gcc -Iincludes src/database.c tests.c \
+              -o test_runner \
+              -lsqlite3 -fprofile-arcs -ftest-coverage -lgcov
 
-      - name: Run tests
-        working-directory: ./project
-        run: ./test_runner
+      - name: Run tests
+        working-directory: ./project
+        run: ./test_runner
 
-      - name: Run main application
-        working-directory: ./project
-        run: ./bin/app || true
+      - name: Generate coverage report
+        working-directory: ./project
+        run: |
+          lcov --capture --directory . --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" --output-file coverage.info --ignore-errors unused
+          lcov --list coverage.info
 
-      - name: Generate coverage report
-        working-directory: ./project
-        run: |
-          lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" --output-file coverage.info --ignore-errors unused
-          lcov --list coverage.info
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: project/coverage.info
-          fail_ci_if_error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: project/coverage.info
+          fail_ci_if_error: true
